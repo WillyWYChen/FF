@@ -7,11 +7,15 @@
 #define WM_MY_MSG (WM_USER+38)
 
 #define WPARAM_UPDATE_GUI	(1)
+#define WPARAM_TEXT_UP		(2)
+#define WPARAM_TEXT_DOWN	(3)
+#define WPARAM_TEXT_LEFT	(4)
+#define WPARAM_TEXT_RIGHT	(5)
 
 #define INIT_UPDATE_TIMER_ID		(5566)
 #define DRAW_ANIMATION_TIMER_ID		(9527)
 
-#define ANIMATION_BACKGROUND_COLOR	RGB(250,211,236)
+#define ANIMATION_BACKGROUND_COLOR	RGB(182,250,137)
 #define ANIMATION_WAIT_MS			(3000)
 #define TYPE2_SHOW_INTERVAL_MS		(1000)
 
@@ -20,7 +24,7 @@
 #define TYPE1_DRAW_SOUND			"res\\show.wav"
 #define TYPE2_DRAW_SOUND			"res\\show2.wav"
 
-#define RESEULT_TEXT_FONT_SIZE		(600)	// unit is 1/10 point
+#define RESEULT_TEXT_FONT_SIZE		(1200)	// unit is 1/10 point
 #define RESEULT_TEXT_FONT_COLOR		RGB(255,0,0)
 #define RESEULT_TEXT_FONT_NAME		"Britannic Bold"
 
@@ -47,6 +51,7 @@ struct ShareData {
 
 	int ShowType;
 	int ShowCount;
+	int Paused;
 	CString NextShowValue;
 };
 

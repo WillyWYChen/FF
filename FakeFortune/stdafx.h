@@ -34,6 +34,7 @@
 #include <afxcontrolbars.h>     // 功能區和控制列的 MFC 支援
 #include <afxcontrolbars.h>
 #include <afxcontrolbars.h>
+#include <afxcontrolbars.h>
 
 
 

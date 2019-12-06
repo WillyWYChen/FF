@@ -10,6 +10,7 @@
 #include "sharedata.h"
 #include "PoolDlg.h"
 #include "HistoryDlg.h"
+#include "CustomDlg.h"
 
 #include "mmsystem.h"
 #pragma comment(lib,"Winmm.lib")
@@ -22,8 +23,10 @@
 
 PoolDlg poolDlg;
 HistoryDlg historyDlg;
+CustomDlg customDlg;
 
 CStdioFile Logfile;
+int dlgInitialize = 0;
 
 // Keep improving random function
 class RandomSequence
@@ -113,6 +116,13 @@ void CFakeFortuneDlg::DoDataExchange(CDataExchange* pDX)
 	CDialogEx::DoDataExchange(pDX);
 	DDX_Control(pDX, IDC_MYPICTURE, m_Picture);
 	DDX_Control(pDX, IDC_FORETEXT, m_ForeText);
+	DDX_Control(pDX, IDC_BUTTON_SHOW_POOL, m_poolBtn);
+	DDX_Control(pDX, IDC_BUTTON_SHOW_HISTORY, m_historyBtn);
+	DDX_Control(pDX, IDC_BUTTON_SHOW_CUSTOM, m_customBtn);
+	DDX_Control(pDX, IDC_BUTTON_TYPE1_DRAW, m_type1Btn);
+	DDX_Control(pDX, IDC_BUTTON_TYPE2_DRAW, m_type2Btn);
+	DDX_Control(pDX, IDCANCEL, m_cancelBtn);
+	DDX_Control(pDX, IDC_BUTTON_PAUSE, m_pauseBtn);
 }
 
 BEGIN_MESSAGE_MAP(CFakeFortuneDlg, CDialogEx)
@@ -127,6 +137,9 @@ BEGIN_MESSAGE_MAP(CFakeFortuneDlg, CDialogEx)
 	ON_WM_CLOSE()
 //	ON_BN_CLICKED(IDC_STOP, &CFakeFortuneDlg::OnBnClickedStop)
 	ON_BN_CLICKED(IDC_BUTTON_TYPE2_DRAW, &CFakeFortuneDlg::OnBnClickedButtonType2Draw)
+	ON_BN_CLICKED(IDC_BUTTON_SHOW_CUSTOM, &CFakeFortuneDlg::OnBnClickedButtonShowCustom)
+	ON_WM_SIZE()
+	ON_BN_CLICKED(IDC_BUTTON_PAUSE, &CFakeFortuneDlg::OnBnClickedButtonPause)
 END_MESSAGE_MAP()
 
 
@@ -164,6 +177,7 @@ BOOL CFakeFortuneDlg::OnInitDialog()
 	// TODO: 在此加入額外的初始設定
 	poolDlg.Create(IDD_POOL_DIALOG, NULL);
 	historyDlg.Create(IDD_HISTORY_DIALOG, NULL);
+	customDlg.Create(IDD_DIALOG_CUSTOM, NULL);
 
 	if (PromptLoadData()) {
 		SetTimer(INIT_UPDATE_TIMER_ID, 100, NULL);
@@ -184,7 +198,11 @@ BOOL CFakeFortuneDlg::OnInitDialog()
 	m_Font.CreatePointFont(RESEULT_TEXT_FONT_SIZE, TEXT(RESEULT_TEXT_FONT_NAME));
 	m_ForeText.SetFont(&m_Font, 1);
 
-	//m_Random.Initialize();
+	EnablePauseButton(0);
+
+	GetDlgItem(IDC_BUTTON_SHOW_CUSTOM)->ShowWindow(0);
+
+	dlgInitialize = 1;
 
 	return TRUE;  // 傳回 TRUE，除非您對控制項設定焦點
 }
@@ -313,6 +331,70 @@ LRESULT CFakeFortuneDlg::OnMyMSG(WPARAM wPararm, LPARAM lParam)
 			break;
 		}
 		break;
+	case WPARAM_TEXT_UP:
+		{
+			RECT ctrlRect;
+			m_ForeText.GetWindowRect(&ctrlRect);
+			ScreenToClient(&ctrlRect);
+			ctrlRect.top -= 1;
+			ctrlRect.bottom -= 1;
+
+			m_Picture.Load(_T(RESULT_BACKGROUND));
+			m_Picture.Draw();
+			m_ForeText.MoveWindow(&ctrlRect, 0);
+			CString str;
+			m_ForeText.GetWindowText(str);
+			m_ForeText.SetWindowText(str);
+		}
+		break;
+	case WPARAM_TEXT_DOWN:
+		{
+			RECT ctrlRect;
+			m_ForeText.GetWindowRect(&ctrlRect);
+			ScreenToClient(&ctrlRect);
+			ctrlRect.top += 1;
+			ctrlRect.bottom += 1;
+			
+			m_Picture.Load(_T(RESULT_BACKGROUND));
+			m_Picture.Draw();
+			m_ForeText.MoveWindow(&ctrlRect, 0);
+			CString str;
+			m_ForeText.GetWindowText(str);
+			m_ForeText.SetWindowText(str);
+		}
+		break;
+	case WPARAM_TEXT_LEFT:
+		{
+			RECT ctrlRect;
+			m_ForeText.GetWindowRect(&ctrlRect);
+			ScreenToClient(&ctrlRect);
+			ctrlRect.left -= 1;
+			ctrlRect.left -= 1;
+			
+			m_Picture.Load(_T(RESULT_BACKGROUND));
+			m_Picture.Draw();
+			m_ForeText.MoveWindow(&ctrlRect, 0);
+			CString str;
+			m_ForeText.GetWindowText(str);
+			m_ForeText.SetWindowText(str);
+		}
+		break;
+	case WPARAM_TEXT_RIGHT:
+		{
+			RECT ctrlRect;
+			m_ForeText.GetWindowRect(&ctrlRect);
+			ScreenToClient(&ctrlRect);
+			ctrlRect.left += 1;
+			ctrlRect.left += 1;
+			
+			m_Picture.Load(_T(RESULT_BACKGROUND));
+			m_Picture.Draw();
+			m_ForeText.MoveWindow(&ctrlRect, 0);
+			CString str;
+			m_ForeText.GetWindowText(str);
+			m_ForeText.SetWindowText(str);
+		}
+		break;
 	default:
 		break;
 	}
@@ -320,6 +402,11 @@ LRESULT CFakeFortuneDlg::OnMyMSG(WPARAM wPararm, LPARAM lParam)
 	return 0;
 }
 
+void CFakeFortuneDlg::EnablePauseButton(int en)
+{
+	CButton *btn = (CButton *)GetDlgItem(IDC_BUTTON_PAUSE);
+	btn->EnableWindow(en);
+}
 
 void CFakeFortuneDlg::OnTimer(UINT_PTR nIDEvent)
 {
@@ -351,6 +438,7 @@ void CFakeFortuneDlg::OnTimer(UINT_PTR nIDEvent)
 			if (gShareData.ShowCount > len) {
 				KillTimer(nIDEvent);
 				EnableDrawButton(1);
+				EnablePauseButton(0);
 				return;
 			}
 
@@ -360,6 +448,7 @@ void CFakeFortuneDlg::OnTimer(UINT_PTR nIDEvent)
 				SetTimer(DRAW_ANIMATION_TIMER_ID, TYPE2_SHOW_INTERVAL_MS, NULL);
 				m_Picture.Load(_T(RESULT_BACKGROUND));
 				m_Picture.Draw();
+				EnablePauseButton(1);
 			}
 
 			m_ForeText.SetWindowText(gShareData.NextShowValue.Mid(0, gShareData.ShowCount));
@@ -456,6 +545,8 @@ void CFakeFortuneDlg::OnBnClickedButtonType2Draw()
 
 	///
 	EnableDrawButton(0);
+
+	///
 }
 
 void CFakeFortuneDlg::EnableDrawButton(int en)
@@ -465,4 +556,104 @@ void CFakeFortuneDlg::EnableDrawButton(int en)
 	btn->EnableWindow(en);
 	btn = (CButton*)this->GetDlgItem(IDC_BUTTON_TYPE2_DRAW);
 	btn->EnableWindow(en);
+}
+
+
+void CFakeFortuneDlg::OnBnClickedButtonShowCustom()
+{
+	// TODO: 在此加入控制項告知處理常式程式碼
+	customDlg.ShowWindow(SW_SHOW);
+	customDlg.UpdateWindow();
+}
+
+void CFakeFortuneDlg::MoveFromBottomRight(CWnd *wnd, int right, int bottom)
+{
+	RECT dlgRect;
+	this->GetWindowRect(&dlgRect); //dlg's screen rect
+	int dlgHeight = dlgRect.bottom - dlgRect.top;
+	int dlgWidth = dlgRect.right - dlgRect.left;
+
+	RECT cBtnRect;
+	wnd->GetWindowRect(&cBtnRect);
+	int cBtnHeight = cBtnRect.bottom - cBtnRect.top;
+	int cBtnWidth = cBtnRect.right - cBtnRect.left;
+	ScreenToClient(&cBtnRect);
+	cBtnRect.right = dlgWidth - right;
+	cBtnRect.left = cBtnRect.right - cBtnWidth;
+	cBtnRect.bottom = dlgHeight - bottom;
+	cBtnRect.top = cBtnRect.bottom - cBtnHeight;
+	wnd->MoveWindow(&cBtnRect);
+}
+
+void CFakeFortuneDlg::ResizeCanvas(int width, int height)
+{
+	RECT cRect;
+	m_Picture.GetWindowRect(&cRect);
+	ScreenToClient(&cRect);
+	cRect.right = cRect.left + width;
+	cRect.bottom = cRect.top + height;
+
+	m_Picture.MoveWindow(&cRect);
+}
+
+void CFakeFortuneDlg::OnSize(UINT nType, int cx, int cy)
+{
+	CDialogEx::OnSize(nType, cx, cy);
+
+	// TODO: 在此加入您的訊息處理常式程式碼
+	TRACE(TEXT("Size changed\n"));
+	if (!dlgInitialize)
+		return;
+
+	//////////////////////////////////////////////////
+
+	MoveFromBottomRight(&m_poolBtn, 40, 420);
+	MoveFromBottomRight(&m_historyBtn, 40, 350);
+	MoveFromBottomRight(&m_pauseBtn, 40, 280);
+	MoveFromBottomRight(&m_type1Btn, 40, 210);
+	MoveFromBottomRight(&m_type2Btn, 40, 140);
+	MoveFromBottomRight(&m_cancelBtn, 40, 70);
+
+	//////////////////////////////////////////////////
+
+	RECT dlgRect;
+	this->GetWindowRect(&dlgRect); //dlg's screen rect
+	int dlgHeight = dlgRect.bottom - dlgRect.top;
+	int dlgWidth = dlgRect.right - dlgRect.left;
+
+	//canvas 720 * 720
+	RECT canvasRect;
+	canvasRect.top = (dlgHeight / 2 - 360);
+	canvasRect.bottom = canvasRect.top + 720;
+	canvasRect.left = dlgWidth / 2 - 380;
+	canvasRect.right = canvasRect.left + 720;
+	m_Picture.MoveWindow(&canvasRect);
+
+	//Text
+	RECT textRect;
+	textRect.left = canvasRect.left + 63;
+	textRect.right = textRect.left + 650;
+	textRect.top = canvasRect.top + 253;
+	textRect.bottom = textRect.top + 200;
+	m_ForeText.MoveWindow(&textRect);
+
+	m_Picture.Load(_T(RESULT_BACKGROUND));
+	m_Picture.Draw();
+	CString str;
+	m_ForeText.GetWindowText(str);
+	m_ForeText.SetWindowText(str);
+}
+
+
+void CFakeFortuneDlg::OnBnClickedButtonPause()
+{
+	// TODO: 在此加入控制項告知處理常式程式碼
+	if (gShareData.Paused) {
+		gShareData.Paused = 0;
+		SetTimer(DRAW_ANIMATION_TIMER_ID, TYPE2_SHOW_INTERVAL_MS, NULL);
+	}
+	else {
+		gShareData.Paused = 1;
+		KillTimer(DRAW_ANIMATION_TIMER_ID);
+	}
 }

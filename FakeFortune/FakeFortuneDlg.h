@@ -27,7 +27,6 @@ public:
 // 程式碼實作
 protected:
 	HICON m_hIcon;
-	CPictureEx m_Picture;
 
 	// 產生的訊息對應函式
 	virtual BOOL OnInitDialog();
@@ -44,6 +43,11 @@ protected:
 
 	void TypedDisplayNth(int idx, int type = 1);
 	void EnableDrawButton(int en);
+	void EnablePauseButton(int en);
+
+	void MoveFromBottomRight(CWnd *wnd, int right, int bottom);
+
+	void ResizeCanvas(int width, int height);
 
 	DWORD GetRandom();
 public:
@@ -56,6 +60,19 @@ public:
 
 protected:
 	CFont m_Font;
-	CTransparentStatic m_ForeText;
 	CTrueRandom m_Random;	
+public:
+	afx_msg void OnBnClickedButtonShowCustom();
+	afx_msg void OnSize(UINT nType, int cx, int cy);
+
+	CPictureEx m_Picture;
+	CTransparentStatic m_ForeText;
+	CButton m_poolBtn;
+	CButton m_historyBtn;
+	CButton m_customBtn;
+	CButton m_type1Btn;
+	CButton m_type2Btn;
+	CButton m_cancelBtn;
+	afx_msg void OnBnClickedButtonPause();
+	CButton m_pauseBtn;
 };

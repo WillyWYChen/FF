@@ -183,6 +183,7 @@
     </ResourceCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="CustomDlg.h" />
     <ClInclude Include="FakeFortune.h" />
     <ClInclude Include="FakeFortuneDlg.h" />
     <ClInclude Include="HistoryDlg.h" />
@@ -197,6 +198,7 @@
     <ClInclude Include="TrueRandom.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="CustomDlg.cpp" />
     <ClCompile Include="FakeFortune.cpp" />
     <ClCompile Include="FakeFortuneDlg.cpp" />
     <ClCompile Include="HistoryDlg.cpp" />
