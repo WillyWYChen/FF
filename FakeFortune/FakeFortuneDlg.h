@@ -60,6 +60,7 @@ public:
 
 protected:
 	CFont m_Font;
+	CFont m_Font2;
 	CTrueRandom m_Random;	
 public:
 	afx_msg void OnBnClickedButtonShowCustom();
@@ -67,6 +68,7 @@ public:
 
 	CPictureEx m_Picture;
 	CTransparentStatic m_ForeText;
+	CTransparentStatic m_ForeText2;
 	CButton m_poolBtn;
 	CButton m_historyBtn;
 	CButton m_customBtn;

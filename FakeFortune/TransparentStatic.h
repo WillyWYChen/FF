@@ -11,10 +11,12 @@ public:
 	CTransparentStatic();
 	virtual ~CTransparentStatic();
 
+	COLORREF m_color;
+
 protected:
-   afx_msg LRESULT OnSetText(WPARAM,LPARAM);
-   afx_msg HBRUSH CtlColor(CDC* /*pDC*/, UINT /*nCtlColor*/);
-   DECLARE_MESSAGE_MAP()
+	afx_msg LRESULT OnSetText(WPARAM,LPARAM);
+	afx_msg HBRUSH CtlColor(CDC* /*pDC*/, UINT /*nCtlColor*/);
+	DECLARE_MESSAGE_MAP()
 };
 
 

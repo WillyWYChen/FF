@@ -19,6 +19,7 @@
 #define IDC_MYPICTURE                   1005
 #define IDC_FORETEXT                    1006
 #define IDC_STOP                        1007
+#define IDC_FORETEXT2                   1007
 #define IDC_BUTTON_TYPE1_DRAW2          1008
 #define IDC_BUTTON_TYPE2_DRAW           1008
 #define IDC_SPIN_UD                     1010

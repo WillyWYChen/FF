@@ -116,6 +116,7 @@ void CFakeFortuneDlg::DoDataExchange(CDataExchange* pDX)
 	CDialogEx::DoDataExchange(pDX);
 	DDX_Control(pDX, IDC_MYPICTURE, m_Picture);
 	DDX_Control(pDX, IDC_FORETEXT, m_ForeText);
+	DDX_Control(pDX, IDC_FORETEXT2, m_ForeText2);
 	DDX_Control(pDX, IDC_BUTTON_SHOW_POOL, m_poolBtn);
 	DDX_Control(pDX, IDC_BUTTON_SHOW_HISTORY, m_historyBtn);
 	DDX_Control(pDX, IDC_BUTTON_SHOW_CUSTOM, m_customBtn);
@@ -197,6 +198,11 @@ BOOL CFakeFortuneDlg::OnInitDialog()
 
 	m_Font.CreatePointFont(RESEULT_TEXT_FONT_SIZE, TEXT(RESEULT_TEXT_FONT_NAME));
 	m_ForeText.SetFont(&m_Font, 1);
+	m_ForeText.m_color = RESEULT_TEXT_FONT_COLOR;
+
+	m_Font2.CreatePointFont(RESEULT_TEXT_FONT2_SIZE, TEXT(RESEULT_TEXT_FONT2_NAME));
+	m_ForeText2.SetFont(&m_Font2, 1);
+	m_ForeText2.m_color = RESEULT_TEXT_FONT2_COLOR;
 
 	EnablePauseButton(0);
 
@@ -426,6 +432,7 @@ void CFakeFortuneDlg::OnTimer(UINT_PTR nIDEvent)
 			m_Picture.Load(_T(RESULT_BACKGROUND));
 			m_Picture.Draw();
 			m_ForeText.SetWindowText(gShareData.NextShowValue);
+			m_ForeText2.SetWindowText(gShareData.NextShowName);
 			PlaySound(TEXT(TYPE1_DRAW_SOUND), 0, SND_FILENAME | SND_ASYNC);
 			KillTimer(nIDEvent);
 			EnableDrawButton(1);
@@ -436,6 +443,8 @@ void CFakeFortuneDlg::OnTimer(UINT_PTR nIDEvent)
 			int len = gShareData.NextShowValue.GetLength();
 
 			if (gShareData.ShowCount > len) {
+				m_ForeText2.SetWindowText(gShareData.NextShowName);
+				PlaySound(TEXT(TYPE1_DRAW_SOUND), 0, SND_FILENAME | SND_ASYNC);
 				KillTimer(nIDEvent);
 				EnableDrawButton(1);
 				EnablePauseButton(0);
@@ -498,6 +507,7 @@ void CFakeFortuneDlg::TypedDisplayNth(int idx, int type)
 	gShareData.ShowType = type;
 	gShareData.ShowCount = 0;
 	gShareData.NextShowValue = str;
+	gShareData.NextShowName = it->name;
 
 	m_Picture.Load(_T(ANIMATION_BACKGROUND));
 	m_Picture.SetBkColor(ANIMATION_BACKGROUND_COLOR);
@@ -629,19 +639,29 @@ void CFakeFortuneDlg::OnSize(UINT nType, int cx, int cy)
 	canvasRect.right = canvasRect.left + 720;
 	m_Picture.MoveWindow(&canvasRect);
 
-	//Text
+	//Text 650 * 300
 	RECT textRect;
 	textRect.left = canvasRect.left + 63;
 	textRect.right = textRect.left + 650;
 	textRect.top = canvasRect.top + 253;
-	textRect.bottom = textRect.top + 200;
+	textRect.bottom = textRect.top + 300;
 	m_ForeText.MoveWindow(&textRect);
 
+	//Text 300 * 200
+	textRect.left = textRect.left + 110;
+	textRect.right = textRect.left + 500;
+	textRect.top = textRect.top + 160;
+	textRect.bottom = textRect.top + 200;
+	m_ForeText2.MoveWindow(&textRect);
+
+	//Redraw
 	m_Picture.Load(_T(RESULT_BACKGROUND));
 	m_Picture.Draw();
 	CString str;
 	m_ForeText.GetWindowText(str);
 	m_ForeText.SetWindowText(str);
+	m_ForeText2.GetWindowText(str);
+	m_ForeText2.SetWindowText(str);
 }
 
 

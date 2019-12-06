@@ -41,7 +41,7 @@ LRESULT CTransparentStatic::OnSetText(WPARAM wParam,LPARAM lParam)
 HBRUSH CTransparentStatic::CtlColor(CDC* pDC, UINT /*nCtlColor*/)
 {
    pDC->SetBkMode(TRANSPARENT);
-   pDC->SetTextColor(RESEULT_TEXT_FONT_COLOR);
+   pDC->SetTextColor(m_color);
    return (HBRUSH)GetStockObject(NULL_BRUSH);
 }
 

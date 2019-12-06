@@ -28,6 +28,10 @@
 #define RESEULT_TEXT_FONT_COLOR		RGB(255,0,0)
 #define RESEULT_TEXT_FONT_NAME		"Britannic Bold"
 
+#define RESEULT_TEXT_FONT2_SIZE		(850)	// unit is 1/10 point
+#define RESEULT_TEXT_FONT2_COLOR	RGB(0,0,255)
+#define RESEULT_TEXT_FONT2_NAME		"·L³n¥¿¶ÂÅé"
+
 class EmployeeRecord {
 public:
 	bool operator< (const EmployeeRecord &rhs) const
@@ -53,6 +57,7 @@ struct ShareData {
 	int ShowCount;
 	int Paused;
 	CString NextShowValue;
+	CString NextShowName;
 };
 
 extern struct ShareData gShareData;
