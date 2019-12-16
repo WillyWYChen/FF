@@ -50,6 +50,8 @@ protected:
 	void ResizeCanvas(int width, int height);
 
 	DWORD GetRandom();
+
+	void RedrawButtons();
 public:
 	afx_msg void OnBnClickedButtonShowPool();
 	afx_msg void OnBnClickedButtonShowHistory();

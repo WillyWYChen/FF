@@ -436,6 +436,7 @@ void CFakeFortuneDlg::OnTimer(UINT_PTR nIDEvent)
 			PlaySound(TEXT(TYPE1_DRAW_SOUND), 0, SND_FILENAME | SND_ASYNC);
 			KillTimer(nIDEvent);
 			EnableDrawButton(1);
+			RedrawButtons();
 		}
 		else if (gShareData.ShowType == 2) {
 			m_Picture.Stop();
@@ -448,6 +449,7 @@ void CFakeFortuneDlg::OnTimer(UINT_PTR nIDEvent)
 				KillTimer(nIDEvent);
 				EnableDrawButton(1);
 				EnablePauseButton(0);
+				RedrawButtons();
 				return;
 			}
 
@@ -512,6 +514,7 @@ void CFakeFortuneDlg::TypedDisplayNth(int idx, int type)
 	m_Picture.Load(_T(ANIMATION_BACKGROUND));
 	m_Picture.SetBkColor(ANIMATION_BACKGROUND_COLOR);
 	m_Picture.Draw();
+	m_ForeText2.SetWindowText("");
 	SetTimer(DRAW_ANIMATION_TIMER_ID, ANIMATION_WAIT_MS, NULL);
 }
 
@@ -662,8 +665,21 @@ void CFakeFortuneDlg::OnSize(UINT nType, int cx, int cy)
 	m_ForeText.SetWindowText(str);
 	m_ForeText2.GetWindowText(str);
 	m_ForeText2.SetWindowText(str);
+
+	// 
+	RedrawButtons();
 }
 
+void CFakeFortuneDlg::RedrawButtons()
+{
+	m_poolBtn.RedrawWindow();
+	m_historyBtn.RedrawWindow();
+	m_customBtn.RedrawWindow();
+	m_type1Btn.RedrawWindow();
+	m_type2Btn.RedrawWindow();
+	m_cancelBtn.RedrawWindow();
+	m_pauseBtn.RedrawWindow();
+}
 
 void CFakeFortuneDlg::OnBnClickedButtonPause()
 {
