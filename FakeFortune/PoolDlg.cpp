@@ -42,11 +42,11 @@ BOOL PoolDlg::OnInitDialog()
 	list->SetExtendedStyle(list->GetExtendedStyle() | LVS_EX_FULLROWSELECT);
 	list->InsertColumn(
 		0,              // Rank/order of item 
-		TEXT("工號"),          // Caption for this header 
+		TEXT("Number"),          // Caption for this header 
 		LVCFMT_LEFT,    // Relative position of items under header 
 		60);           // Width of items under header
 
-	list->InsertColumn(1, TEXT("姓名"), LVCFMT_LEFT, 60);
+	list->InsertColumn(1, TEXT("Name"), LVCFMT_LEFT, 60);
 
 	return TRUE;  // 傳回 TRUE，除非您對控制項設定焦點
 }
@@ -78,7 +78,7 @@ void PoolDlg::UpdateListContent()
 		int Count = list->GetItemCount();
 		int nItem;
 		CString id_str;
-		id_str.Format("%d", it->id);
+		id_str.Format(TEXT("%d"), it->id);
 		
 		nItem = list->InsertItem(Count, id_str);
 		list->SetItemText(nItem, 1, it->name);

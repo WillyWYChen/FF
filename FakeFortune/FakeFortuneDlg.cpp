@@ -141,6 +141,7 @@ BEGIN_MESSAGE_MAP(CFakeFortuneDlg, CDialogEx)
 	ON_BN_CLICKED(IDC_BUTTON_SHOW_CUSTOM, &CFakeFortuneDlg::OnBnClickedButtonShowCustom)
 	ON_WM_SIZE()
 	ON_BN_CLICKED(IDC_BUTTON_PAUSE, &CFakeFortuneDlg::OnBnClickedButtonPause)
+	ON_WM_CTLCOLOR()
 END_MESSAGE_MAP()
 
 
@@ -191,7 +192,7 @@ BOOL CFakeFortuneDlg::OnInitDialog()
 	Logfile.WriteString(log);
 
 	if (m_Picture.Load(_T(RESULT_BACKGROUND))) {
-		m_Picture.SetBkColor(ANIMATION_BACKGROUND_COLOR);
+		m_Picture.SetBkColor(RESULT_BACKGROUND_COLOR);
 		m_Picture.Stop();
 		m_Picture.Draw();
 	}
@@ -206,11 +207,30 @@ BOOL CFakeFortuneDlg::OnInitDialog()
 
 	EnablePauseButton(0);
 
+	//////////////////////////////////
 	GetDlgItem(IDC_BUTTON_SHOW_CUSTOM)->ShowWindow(0);
-
+	debugFlag = 0;
 	dlgInitialize = 1;
 
 	return TRUE;  // 傳回 TRUE，除非您對控制項設定焦點
+}
+
+CString UTF8ToUnicode(char* UTF8)
+{
+
+	DWORD dwUnicodeLen;
+	LPWSTR pwText;
+	CString strUnicode;
+	dwUnicodeLen = MultiByteToWideChar(CP_UTF8, 0, UTF8, -1, NULL, 0);
+	pwText = new WCHAR[dwUnicodeLen];
+	if (!pwText)
+	{
+		return strUnicode;
+	}
+	MultiByteToWideChar(CP_UTF8, 0, UTF8, -1, pwText, dwUnicodeLen);
+	strUnicode.Format(_T("%s"), pwText);
+	delete[]pwText;
+	return strUnicode;
 }
 
 int CFakeFortuneDlg::PromptLoadData()
@@ -235,6 +255,14 @@ int CFakeFortuneDlg::PromptLoadData()
 	while (1) {
 		if (!file.ReadString(temp))
 			break;
+		//Translate
+		char *pStr = (char*)temp.GetBuffer(temp.GetLength()); //取得str對象的原始字符串
+		int nBufferSize = MultiByteToWideChar(CP_UTF8, 0, pStr, -1, NULL, 0); //取得所需緩存的多少
+		wchar_t *pBuffer = (wchar_t*)malloc(nBufferSize * sizeof(wchar_t));//申請緩存空間
+		MultiByteToWideChar(CP_UTF8, 0, pStr, -1, pBuffer, nBufferSize * sizeof(wchar_t));//轉碼
+		temp = CString(pBuffer);
+		free(pBuffer); //釋放緩存
+
 		// Parse string
 		std::vector<CString> result = split(temp, TEXT(","));
 		if (result.size() >= 2) {
@@ -346,6 +374,7 @@ LRESULT CFakeFortuneDlg::OnMyMSG(WPARAM wPararm, LPARAM lParam)
 			ctrlRect.bottom -= 1;
 
 			m_Picture.Load(_T(RESULT_BACKGROUND));
+			m_Picture.SetBkColor(RESULT_BACKGROUND_COLOR);
 			m_Picture.Draw();
 			m_ForeText.MoveWindow(&ctrlRect, 0);
 			CString str;
@@ -362,6 +391,7 @@ LRESULT CFakeFortuneDlg::OnMyMSG(WPARAM wPararm, LPARAM lParam)
 			ctrlRect.bottom += 1;
 			
 			m_Picture.Load(_T(RESULT_BACKGROUND));
+			m_Picture.SetBkColor(RESULT_BACKGROUND_COLOR);
 			m_Picture.Draw();
 			m_ForeText.MoveWindow(&ctrlRect, 0);
 			CString str;
@@ -378,6 +408,7 @@ LRESULT CFakeFortuneDlg::OnMyMSG(WPARAM wPararm, LPARAM lParam)
 			ctrlRect.left -= 1;
 			
 			m_Picture.Load(_T(RESULT_BACKGROUND));
+			m_Picture.SetBkColor(RESULT_BACKGROUND_COLOR);
 			m_Picture.Draw();
 			m_ForeText.MoveWindow(&ctrlRect, 0);
 			CString str;
@@ -394,6 +425,7 @@ LRESULT CFakeFortuneDlg::OnMyMSG(WPARAM wPararm, LPARAM lParam)
 			ctrlRect.left += 1;
 			
 			m_Picture.Load(_T(RESULT_BACKGROUND));
+			m_Picture.SetBkColor(RESULT_BACKGROUND_COLOR);
 			m_Picture.Draw();
 			m_ForeText.MoveWindow(&ctrlRect, 0);
 			CString str;
@@ -430,6 +462,7 @@ void CFakeFortuneDlg::OnTimer(UINT_PTR nIDEvent)
 		if (gShareData.ShowType == 1) {
 			m_Picture.Stop();
 			m_Picture.Load(_T(RESULT_BACKGROUND));
+			m_Picture.SetBkColor(RESULT_BACKGROUND_COLOR);
 			m_Picture.Draw();
 			m_ForeText.SetWindowText(gShareData.NextShowValue);
 			m_ForeText2.SetWindowText(gShareData.NextShowName);
@@ -458,6 +491,7 @@ void CFakeFortuneDlg::OnTimer(UINT_PTR nIDEvent)
 				KillTimer(nIDEvent);
 				SetTimer(DRAW_ANIMATION_TIMER_ID, TYPE2_SHOW_INTERVAL_MS, NULL);
 				m_Picture.Load(_T(RESULT_BACKGROUND));
+				m_Picture.SetBkColor(RESULT_BACKGROUND_COLOR);
 				m_Picture.Draw();
 				EnablePauseButton(1);
 			}
@@ -505,7 +539,7 @@ void CFakeFortuneDlg::TypedDisplayNth(int idx, int type)
 	//TRACE(TEXT("show type 1 emplyee %d win\n"), it->id);
 
 	CString str;
-	str.Format("%d", it->id);
+	str.Format(TEXT("%d"), it->id);
 	gShareData.ShowType = type;
 	gShareData.ShowCount = 0;
 	gShareData.NextShowValue = str;
@@ -514,7 +548,7 @@ void CFakeFortuneDlg::TypedDisplayNth(int idx, int type)
 	m_Picture.Load(_T(ANIMATION_BACKGROUND));
 	m_Picture.SetBkColor(ANIMATION_BACKGROUND_COLOR);
 	m_Picture.Draw();
-	m_ForeText2.SetWindowText("");
+	m_ForeText2.SetWindowText(TEXT(""));
 	SetTimer(DRAW_ANIMATION_TIMER_ID, ANIMATION_WAIT_MS, NULL);
 }
 
@@ -528,19 +562,33 @@ void CFakeFortuneDlg::OnClose()
 
 void CFakeFortuneDlg::OnBnClickedButtonType1Draw()
 {
-	// TODO: 在此加入控制項告知處理常式程式碼
-	int pool_size = gShareData.GlobalSet.size();
-	if (pool_size <= 0) {
-		MessageBox(TEXT("沒了啦!"), TEXT("訊息"));
-		return;
+	if (debugFlag) {
+		// TODO: 在此加入控制項告知處理常式程式碼
+		int i = 40;
+		while (i--) {
+			int pool_size = gShareData.GlobalSet.size();
+			if (pool_size <= 0) {
+				break;
+			}
+			DWORD draw = GetRandom() % pool_size;
+			RemoveNthFromPool(draw);
+		}
 	}
-	DWORD draw = GetRandom()%pool_size;
-	//TRACE(TEXT("Pool Size %d draw %d\n"), pool_size, draw);
-	TypedDisplayNth(draw, 1);
-	RemoveNthFromPool(draw);
+	else {
+		// TODO: 在此加入控制項告知處理常式程式碼
+		int pool_size = gShareData.GlobalSet.size();
+		if (pool_size <= 0) {
+			MessageBox(TEXT("沒了啦!"), TEXT("訊息"));
+			return;
+		}
+		DWORD draw = GetRandom() % pool_size;
+		//TRACE(TEXT("Pool Size %d draw %d\n"), pool_size, draw);
+		TypedDisplayNth(draw, 1);
+		RemoveNthFromPool(draw);
 
-	///
-	EnableDrawButton(0);
+		///
+		EnableDrawButton(0);
+	}
 }
 
 void CFakeFortuneDlg::OnBnClickedButtonType2Draw()
@@ -659,6 +707,7 @@ void CFakeFortuneDlg::OnSize(UINT nType, int cx, int cy)
 
 	//Redraw
 	m_Picture.Load(_T(RESULT_BACKGROUND));
+	m_Picture.SetBkColor(RESULT_BACKGROUND_COLOR);
 	m_Picture.Draw();
 	CString str;
 	m_ForeText.GetWindowText(str);
@@ -692,4 +741,44 @@ void CFakeFortuneDlg::OnBnClickedButtonPause()
 		gShareData.Paused = 1;
 		KillTimer(DRAW_ANIMATION_TIMER_ID);
 	}
+}
+
+
+HBRUSH CFakeFortuneDlg::OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor)
+{
+	HBRUSH hbr = CDialogEx::OnCtlColor(pDC, pWnd, nCtlColor);
+
+	// TODO:  在此變更 DC 的任何屬性
+	if (nCtlColor == CTLCOLOR_DLG) {
+		HBRUSH hbr1;
+		// 這裡放你要的顏色 COLORREF m_curColor = RGB(255,0,0);
+		COLORREF m_curColor = RGB(0, 135, 220);
+		hbr1 = CreateSolidBrush(m_curColor);
+		return hbr1;
+	}
+	// TODO:  如果預設值並非想要的，則傳回不同的筆刷
+	return hbr;
+}
+
+
+BOOL CFakeFortuneDlg::PreTranslateMessage(MSG* pMsg)
+{
+	// TODO: 在此加入特定的程式碼和 (或) 呼叫基底類別
+	if (pMsg->message == WM_KEYUP) {
+		TRACE(TEXT("Released %d\n", pMsg->wParam));
+		m_type1Btn.SetWindowText(TEXT("Small\nPrize"));
+		debugFlag = 0;
+		return TRUE;
+	}
+	else if (pMsg->message == WM_KEYDOWN) {
+		TRACE(TEXT("Pressed %d\n", pMsg->wParam));
+		if (debugFlag == 0) {
+			debugFlag = 1;
+			m_type1Btn.SetWindowText(TEXT("TEST 40 Draw"));
+		}
+		return TRUE;
+	}
+
+
+	return CDialogEx::PreTranslateMessage(pMsg);
 }

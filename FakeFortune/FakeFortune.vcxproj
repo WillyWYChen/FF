@@ -45,7 +45,7 @@
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v141</PlatformToolset>
-    <CharacterSet>MultiByte</CharacterSet>
+    <CharacterSet>Unicode</CharacterSet>
     <UseOfMfc>Dynamic</UseOfMfc>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
@@ -85,6 +85,7 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
+    <TargetName>TryLuck</TargetName>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -195,7 +196,6 @@
     <ClInclude Include="targetver.h" />
     <ClInclude Include="TransparentStatic.h" />
     <ClInclude Include="TransparentStatic2.h" />
-    <ClInclude Include="TrueRandom.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="CustomDlg.cpp" />
@@ -213,7 +213,6 @@
     </ClCompile>
     <ClCompile Include="TransparentStatic.cpp" />
     <ClCompile Include="TransparentStatic2.cpp" />
-    <ClCompile Include="TrueRandom.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="FakeFortune.rc" />

@@ -5,6 +5,7 @@
 #include "stdafx.h"
 #include "FakeFortune.h"
 #include "FakeFortuneDlg.h"
+#include "locale.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -39,6 +40,7 @@ CFakeFortuneApp theApp;
 
 BOOL CFakeFortuneApp::InitInstance()
 {
+	setlocale(LC_ALL, "Chinese_Taiwan.950");
 	// 假如應用程式資訊清單指定使用 ComCtl32.dll 6 (含) 以後版本，
 	// 來啟動視覺化樣式，在 Windows XP 上，則需要 InitCommonControls()。
 	// 否則任何視窗的建立都將失敗。

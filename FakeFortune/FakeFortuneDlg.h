@@ -6,7 +6,7 @@
 #include "PictureEx.h"
 #include "TransparentStatic.h"
 #include "TransparentStatic2.h"
-#include "TrueRandom.h"
+//#include "TrueRandom.h"
 
 // CFakeFortuneDlg 對話方塊
 class CFakeFortuneDlg : public CDialogEx
@@ -63,7 +63,8 @@ public:
 protected:
 	CFont m_Font;
 	CFont m_Font2;
-	CTrueRandom m_Random;	
+	//CTrueRandom m_Random;
+	int debugFlag;
 public:
 	afx_msg void OnBnClickedButtonShowCustom();
 	afx_msg void OnSize(UINT nType, int cx, int cy);
@@ -79,4 +80,6 @@ public:
 	CButton m_cancelBtn;
 	afx_msg void OnBnClickedButtonPause();
 	CButton m_pauseBtn;
+	afx_msg HBRUSH OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor);
+	virtual BOOL PreTranslateMessage(MSG* pMsg);
 };
