@@ -34,6 +34,7 @@ LRESULT CTransparentStatic::OnSetText(WPARAM wParam,LPARAM lParam)
    GetParent()->ScreenToClient(&Rect);
    GetParent()->InvalidateRect(&Rect);
    GetParent()->UpdateWindow();
+
    return Result;
 }
 

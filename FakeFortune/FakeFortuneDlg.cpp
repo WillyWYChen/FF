@@ -25,8 +25,81 @@ PoolDlg poolDlg;
 HistoryDlg historyDlg;
 CustomDlg customDlg;
 
-CStdioFile Logfile;
+CString LogFileName = TEXT("LOG_") + CTime::GetCurrentTime().Format("%Y%m%d_%H%M%S") + TEXT(".csv");
 int dlgInitialize = 0;
+
+int Unicode2Utf8(const wchar_t* unicode, char* utf8, int nBuffSize)
+{
+	if (!unicode || !wcslen(unicode))
+	{
+		return 0;
+	}
+	int len;
+	len = WideCharToMultiByte(CP_UTF8, 0, unicode, -1, NULL, 0, NULL, NULL);
+	if (len > nBuffSize)
+	{
+		return 0;
+	}
+	WideCharToMultiByte(CP_UTF8, 0, unicode, -1, utf8, len, NULL, NULL);
+	return len;
+}
+
+void HandleLine(CString &temp)
+{
+	/*
+	wchar_t test = L'\u9AB6';
+	temp = L"48,";
+	temp += test;
+	*/
+
+	std::vector<CString> result = split(temp, TEXT(","));
+	if (result.size() >= 2) {
+		class EmployeeRecord record;
+		record.id = _ttoi(result[0]);
+		record.name = result[1];
+
+		gShareData.GlobalSet.insert(record);
+	}
+}
+
+void DumpBuf(char *buf)
+{
+	for (int i = 0; i < 128; i++) {
+		if (buf[i] == 0x00)
+			break;
+		TRACE("%02xh\n", buf[i]);
+	}
+}
+
+int Utf82Unicode(const char* utf, wchar_t* unicode, int nBuffSize)
+{
+	if (!utf || !strlen(utf))
+	{
+		return 0;
+	}
+	int dwUnicodeLen = MultiByteToWideChar(CP_UTF8, 0, utf, -1, NULL, 0);
+	size_t num = dwUnicodeLen * sizeof(wchar_t);
+	if (num > nBuffSize)
+	{
+		return 0;
+	}
+	MultiByteToWideChar(CP_UTF8, 0, utf, -1, unicode, dwUnicodeLen);
+	return dwUnicodeLen;
+}
+
+void HandleLine(char *buf)
+{
+	/*
+	DumpBuf(buf);
+	TRACE(buf);
+	TRACE("\n");
+	*/
+
+	wchar_t converted[128] = { 0 };
+	Utf82Unicode(buf, converted, 128);
+	CStringW temp(converted);
+	HandleLine(temp);
+}
 
 // Keep improving random function
 class RandomSequence
@@ -186,10 +259,16 @@ BOOL CFakeFortuneDlg::OnInitDialog()
 	}
 
 	//
-	CString filename = TEXT("LOG_") + CTime::GetCurrentTime().Format("%Y%m%d_%H%M%S") + TEXT(".txt");
-	Logfile.Open(filename, CFile::modeReadWrite | CFile::modeCreate);
-	CString log = TEXT("File ") + filename + TEXT(" created\n");
-	Logfile.WriteString(log);
+	CFile Logfile;
+	Logfile.Open(LogFileName, CFile::modeReadWrite | CFile::modeCreate);
+	Logfile.SeekToEnd();
+	CString log = TEXT("File ") + LogFileName + TEXT(" created");
+	char buf[96] = { 0 };
+	Unicode2Utf8(log, buf, 96);
+	Logfile.Write("\xef\xbb\xbf", 3);
+	Logfile.Write(buf, strlen(buf));
+	Logfile.Write("\r\n", 2);
+	Logfile.Close();
 
 	if (m_Picture.Load(_T(RESULT_BACKGROUND))) {
 		m_Picture.SetBkColor(RESULT_BACKGROUND_COLOR);
@@ -215,24 +294,6 @@ BOOL CFakeFortuneDlg::OnInitDialog()
 	return TRUE;  // 傳回 TRUE，除非您對控制項設定焦點
 }
 
-CString UTF8ToUnicode(char* UTF8)
-{
-
-	DWORD dwUnicodeLen;
-	LPWSTR pwText;
-	CString strUnicode;
-	dwUnicodeLen = MultiByteToWideChar(CP_UTF8, 0, UTF8, -1, NULL, 0);
-	pwText = new WCHAR[dwUnicodeLen];
-	if (!pwText)
-	{
-		return strUnicode;
-	}
-	MultiByteToWideChar(CP_UTF8, 0, UTF8, -1, pwText, dwUnicodeLen);
-	strUnicode.Format(_T("%s"), pwText);
-	delete[]pwText;
-	return strUnicode;
-}
-
 int CFakeFortuneDlg::PromptLoadData()
 {
 	CFileDialog dlg(TRUE);
@@ -246,32 +307,40 @@ int CFakeFortuneDlg::PromptLoadData()
 		filename = dlg.GetPathName();
 	}
 
-	CStdioFile file;
+	CFile file;
 	if (!file.Open(filename, CFile::modeRead)) {
 		return 0;
 	}
 
-	CString temp;
+	char lineBuf[128] = { 0 };
+	int idx = 0;
 	while (1) {
-		if (!file.ReadString(temp))
+		char c;
+		UINT ret = file.Read(&c, 1);
+		if (0 == ret)
 			break;
-		//Translate
-		char *pStr = (char*)temp.GetBuffer(temp.GetLength()); //取得str對象的原始字符串
-		int nBufferSize = MultiByteToWideChar(CP_UTF8, 0, pStr, -1, NULL, 0); //取得所需緩存的多少
-		wchar_t *pBuffer = (wchar_t*)malloc(nBufferSize * sizeof(wchar_t));//申請緩存空間
-		MultiByteToWideChar(CP_UTF8, 0, pStr, -1, pBuffer, nBufferSize * sizeof(wchar_t));//轉碼
-		temp = CString(pBuffer);
-		free(pBuffer); //釋放緩存
 
-		// Parse string
-		std::vector<CString> result = split(temp, TEXT(","));
-		if (result.size() >= 2) {
-			class EmployeeRecord record;
-			record.id = _ttoi(result[0]);
-			record.name = result[1];
-
-			gShareData.GlobalSet.insert(record);
+		lineBuf[idx] = c;
+		if (idx >= 1 && (lineBuf[idx] == 0x0a) && (lineBuf[idx - 1] == 0x0d)) {
+			//Handle Line
+			HandleLine(lineBuf);
+			//
+			memset(lineBuf, 0x00, 128);
+			idx = 0;
 		}
+		else {
+			idx++;
+		}
+
+		if (idx >= 128) {
+			lineBuf[127] = 0;
+			break;
+		}
+
+		
+	}
+	if (idx != 0) {
+		HandleLine(lineBuf);
 	}
 	
 	file.Close();
@@ -513,8 +582,16 @@ void CFakeFortuneDlg::RemoveNthFromPool(int idx)
 	CString time = CTime::GetCurrentTime().Format("%Y-%m-%d %H:%M:%S");
 	CString id_str;
 	id_str.Format(TEXT("%d"), it->id);
-	CString log = time + TEXT(",") + id_str + TEXT(",") + it->name + TEXT("\n");
-	Logfile.WriteString(log);
+
+	CString log = time + TEXT(",") + id_str + TEXT(",") + it->name ;
+	char name[96] = { 0 };
+	Unicode2Utf8(log, name, 96);
+	CFile RawLogFile;
+	RawLogFile.Open(LogFileName, CFile::modeReadWrite);
+	RawLogFile.SeekToEnd();
+	RawLogFile.Write(name, strlen(name));
+	//RawLogFile.Write("\r\n", 2);
+	RawLogFile.Close();
 
 	HistoryRecord record;
 	record.time = time;
@@ -539,7 +616,7 @@ void CFakeFortuneDlg::TypedDisplayNth(int idx, int type)
 	//TRACE(TEXT("show type 1 emplyee %d win\n"), it->id);
 
 	CString str;
-	str.Format(TEXT("%d"), it->id);
+	str.Format(TEXT("%06d"), it->id);
 	gShareData.ShowType = type;
 	gShareData.ShowCount = 0;
 	gShareData.NextShowValue = str;
@@ -555,7 +632,6 @@ void CFakeFortuneDlg::TypedDisplayNth(int idx, int type)
 void CFakeFortuneDlg::OnClose()
 {
 	// TODO: 在此加入您的訊息處理常式程式碼和 (或) 呼叫預設值
-	Logfile.Close();
 	CDialogEx::OnClose();
 }
 
@@ -573,6 +649,7 @@ void CFakeFortuneDlg::OnBnClickedButtonType1Draw()
 			DWORD draw = GetRandom() % pool_size;
 			RemoveNthFromPool(draw);
 		}
+		MessageBox(TEXT("完成"), TEXT("訊息"));
 	}
 	else {
 		// TODO: 在此加入控制項告知處理常式程式碼
@@ -751,8 +828,7 @@ HBRUSH CFakeFortuneDlg::OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor)
 	// TODO:  在此變更 DC 的任何屬性
 	if (nCtlColor == CTLCOLOR_DLG) {
 		HBRUSH hbr1;
-		// 這裡放你要的顏色 COLORREF m_curColor = RGB(255,0,0);
-		COLORREF m_curColor = RGB(0, 135, 220);
+		COLORREF m_curColor = COLOR_DELTA_DEEP_BLUE;
 		hbr1 = CreateSolidBrush(m_curColor);
 		return hbr1;
 	}
@@ -766,15 +842,15 @@ BOOL CFakeFortuneDlg::PreTranslateMessage(MSG* pMsg)
 	// TODO: 在此加入特定的程式碼和 (或) 呼叫基底類別
 	if (pMsg->message == WM_KEYUP) {
 		TRACE(TEXT("Released %d\n", pMsg->wParam));
-		m_type1Btn.SetWindowText(TEXT("Small\nPrize"));
-		debugFlag = 0;
-		return TRUE;
-	}
-	else if (pMsg->message == WM_KEYDOWN) {
-		TRACE(TEXT("Pressed %d\n", pMsg->wParam));
-		if (debugFlag == 0) {
-			debugFlag = 1;
-			m_type1Btn.SetWindowText(TEXT("TEST 40 Draw"));
+		if (pMsg->wParam == 65) {
+			if (debugFlag == 0) {
+				m_type1Btn.SetWindowText(TEXT("TEST 40 Draw"));
+				debugFlag = 1;
+			}
+			else {
+				m_type1Btn.SetWindowText(TEXT("Small\nPrize"));
+				debugFlag = 0;
+			}
 		}
 		return TRUE;
 	}
