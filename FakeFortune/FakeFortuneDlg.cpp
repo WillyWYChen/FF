@@ -837,12 +837,38 @@ HBRUSH CFakeFortuneDlg::OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor)
 }
 
 
+void CFakeFortuneDlg::CheckSendClick2Control()
+{
+	CPoint pt;
+	GetCursorPos(&pt);
+	CRect rect;
+	
+	m_type1Btn.GetWindowRect(&rect);
+	if (rect.PtInRect(pt)){
+		//Inside control
+		::PostMessage(this->GetSafeHwnd(),WM_COMMAND, MAKEWPARAM(IDC_BUTTON_TYPE1_DRAW, BN_CLICKED), NULL);
+		return;
+	} else {
+		//
+	}
+	
+	
+	m_type2Btn.GetWindowRect(&rect);
+	if (rect.PtInRect(pt)) {
+		// Inside control
+		::PostMessage(this->GetSafeHwnd(), WM_COMMAND, MAKEWPARAM(IDC_BUTTON_TYPE2_DRAW, BN_CLICKED), NULL);
+		return;
+	} else {
+		//
+	}
+}
+
 BOOL CFakeFortuneDlg::PreTranslateMessage(MSG* pMsg)
 {
 	// TODO: 在此加入特定的程式碼和 (或) 呼叫基底類別
 	if (pMsg->message == WM_KEYUP) {
-		TRACE(TEXT("Released %d\n", pMsg->wParam));
 		if (pMsg->wParam == 65) {
+			TRACE(TEXT("Toggle debug flag %d\n"), pMsg->wParam);
 			if (debugFlag == 0) {
 				m_type1Btn.SetWindowText(TEXT("TEST 40 Draw"));
 				debugFlag = 1;
@@ -851,6 +877,10 @@ BOOL CFakeFortuneDlg::PreTranslateMessage(MSG* pMsg)
 				m_type1Btn.SetWindowText(TEXT("Small\nPrize"));
 				debugFlag = 0;
 			}
+		}
+		else if (pMsg->wParam == 32) {
+			TRACE(TEXT("Simulate mouse\n"));
+			CheckSendClick2Control();
 		}
 		return TRUE;
 	}

@@ -49,6 +49,8 @@ protected:
 
 	void ResizeCanvas(int width, int height);
 
+	void CheckSendClick2Control();
+
 	DWORD GetRandom();
 
 	void RedrawButtons();
