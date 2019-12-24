@@ -49,7 +49,7 @@ protected:
 
 	void ResizeCanvas(int width, int height);
 
-	void CheckSendClick2Control();
+	void DoHitSpaceBar();
 
 	DWORD GetRandom();
 
@@ -84,4 +84,6 @@ public:
 	CButton m_pauseBtn;
 	afx_msg HBRUSH OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor);
 	virtual BOOL PreTranslateMessage(MSG* pMsg);
+	CButton m_RadioSmall;
+	CButton m_RadioBig;
 };

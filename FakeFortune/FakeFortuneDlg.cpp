@@ -46,12 +46,6 @@ int Unicode2Utf8(const wchar_t* unicode, char* utf8, int nBuffSize)
 
 void HandleLine(CString &temp)
 {
-	/*
-	wchar_t test = L'\u9AB6';
-	temp = L"48,";
-	temp += test;
-	*/
-
 	std::vector<CString> result = split(temp, TEXT(","));
 	if (result.size() >= 2) {
 		class EmployeeRecord record;
@@ -197,6 +191,8 @@ void CFakeFortuneDlg::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_BUTTON_TYPE2_DRAW, m_type2Btn);
 	DDX_Control(pDX, IDCANCEL, m_cancelBtn);
 	DDX_Control(pDX, IDC_BUTTON_PAUSE, m_pauseBtn);
+	DDX_Control(pDX, IDC_RADIO_SMALL, m_RadioSmall);
+	DDX_Control(pDX, IDC_RADIO_BIG, m_RadioBig);
 }
 
 BEGIN_MESSAGE_MAP(CFakeFortuneDlg, CDialogEx)
@@ -290,6 +286,8 @@ BOOL CFakeFortuneDlg::OnInitDialog()
 	GetDlgItem(IDC_BUTTON_SHOW_CUSTOM)->ShowWindow(0);
 	debugFlag = 0;
 	dlgInitialize = 1;
+
+	m_RadioSmall.SetCheck(1);
 
 	return TRUE;  // 傳回 TRUE，除非您對控制項設定焦點
 }
@@ -744,7 +742,8 @@ void CFakeFortuneDlg::OnSize(UINT nType, int cx, int cy)
 		return;
 
 	//////////////////////////////////////////////////
-
+	MoveFromBottomRight(&m_RadioSmall, 40, 510);
+	MoveFromBottomRight(&m_RadioBig, 40, 490);
 	MoveFromBottomRight(&m_poolBtn, 40, 420);
 	MoveFromBottomRight(&m_historyBtn, 40, 350);
 	MoveFromBottomRight(&m_pauseBtn, 40, 280);
@@ -798,6 +797,8 @@ void CFakeFortuneDlg::OnSize(UINT nType, int cx, int cy)
 
 void CFakeFortuneDlg::RedrawButtons()
 {
+	m_RadioSmall.RedrawWindow();
+	m_RadioBig.RedrawWindow();
 	m_poolBtn.RedrawWindow();
 	m_historyBtn.RedrawWindow();
 	m_customBtn.RedrawWindow();
@@ -837,29 +838,24 @@ HBRUSH CFakeFortuneDlg::OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor)
 }
 
 
-void CFakeFortuneDlg::CheckSendClick2Control()
+void CFakeFortuneDlg::DoHitSpaceBar()
 {
 	CPoint pt;
 	GetCursorPos(&pt);
 	CRect rect;
 	
-	m_type1Btn.GetWindowRect(&rect);
-	if (rect.PtInRect(pt)){
-		//Inside control
-		::PostMessage(this->GetSafeHwnd(),WM_COMMAND, MAKEWPARAM(IDC_BUTTON_TYPE1_DRAW, BN_CLICKED), NULL);
-		return;
-	} else {
-		//
+	if (m_RadioSmall.GetCheck()) {
+		if (m_type1Btn.IsWindowEnabled()) {
+			::PostMessage(this->GetSafeHwnd(), WM_COMMAND, MAKEWPARAM(IDC_BUTTON_TYPE1_DRAW, BN_CLICKED), NULL);
+			return;
+		}
 	}
-	
-	
-	m_type2Btn.GetWindowRect(&rect);
-	if (rect.PtInRect(pt)) {
-		// Inside control
-		::PostMessage(this->GetSafeHwnd(), WM_COMMAND, MAKEWPARAM(IDC_BUTTON_TYPE2_DRAW, BN_CLICKED), NULL);
-		return;
-	} else {
-		//
+
+	if (m_RadioBig.GetCheck()) {
+		if (m_type2Btn.IsWindowEnabled()) {
+			::PostMessage(this->GetSafeHwnd(), WM_COMMAND, MAKEWPARAM(IDC_BUTTON_TYPE2_DRAW, BN_CLICKED), NULL);
+			return;
+		}
 	}
 }
 
@@ -880,7 +876,7 @@ BOOL CFakeFortuneDlg::PreTranslateMessage(MSG* pMsg)
 		}
 		else if (pMsg->wParam == 32) {
 			TRACE(TEXT("Simulate mouse\n"));
-			CheckSendClick2Control();
+			DoHitSpaceBar();
 		}
 		return TRUE;
 	}
