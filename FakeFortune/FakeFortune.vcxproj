@@ -130,6 +130,12 @@
       <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>$(IntDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ResourceCompile>
+    <PostBuildEvent>
+      <Command>rmdir $(SolutionDir)\FFTest /S /q
+mkdir $(SolutionDir)\FFTest
+copy $(TargetPath) $(SolutionDir)\FFTest\$(TargetFileName)
+xcopy  $(SolutionDir)\FakeFortune\res $(SolutionDir)\FFTest\res /e /i /h</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
@@ -182,6 +188,12 @@
       <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>$(IntDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ResourceCompile>
+    <PostBuildEvent>
+      <Command>rmdir $(SolutionDir)\FFTest /S /q
+mkdir $(SolutionDir)\FFTest
+copy $(TargetPath) $(SolutionDir)\FFTest\$(TargetFileName)
+xcopy  $(SolutionDir)\FakeFortune\res $(SolutionDir)\FFTest\res /e /i /h</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="CustomDlg.h" />

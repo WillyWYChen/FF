@@ -862,7 +862,9 @@ void CFakeFortuneDlg::DoHitSpaceBar()
 BOOL CFakeFortuneDlg::PreTranslateMessage(MSG* pMsg)
 {
 	// TODO: 在此加入特定的程式碼和 (或) 呼叫基底類別
-	if (pMsg->message == WM_KEYUP) {
+	if (pMsg->message == WM_KEYDOWN) {
+		return TRUE;
+	} else if (pMsg->message == WM_KEYUP) {
 		if (pMsg->wParam == 65) {
 			TRACE(TEXT("Toggle debug flag %d\n"), pMsg->wParam);
 			if (debugFlag == 0) {
