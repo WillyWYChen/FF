@@ -256,15 +256,20 @@ BOOL CFakeFortuneDlg::OnInitDialog()
 
 	//
 	CFile Logfile;
-	Logfile.Open(LogFileName, CFile::modeReadWrite | CFile::modeCreate);
-	Logfile.SeekToEnd();
-	CString log = TEXT("File ") + LogFileName + TEXT(" created");
-	char buf[96] = { 0 };
-	Unicode2Utf8(log, buf, 96);
-	Logfile.Write("\xef\xbb\xbf", 3);
-	Logfile.Write(buf, strlen(buf));
-	Logfile.Write("\r\n", 2);
-	Logfile.Close();
+	try {
+		Logfile.Open(LogFileName, CFile::modeReadWrite | CFile::modeCreate);
+		Logfile.SeekToEnd();
+		CString log = TEXT("File ") + LogFileName + TEXT(" created");
+		char buf[96] = { 0 };
+		Unicode2Utf8(log, buf, 96);
+		// Write BOM for M$ software
+		Logfile.Write("\xef\xbb\xbf", 3);
+		Logfile.Write(buf, strlen(buf));
+		Logfile.Write("\r\n", 2);
+		Logfile.Close();
+	} catch (...) {
+		///
+	}
 
 	if (m_Picture.Load(_T(RESULT_BACKGROUND))) {
 		m_Picture.SetBkColor(RESULT_BACKGROUND_COLOR);
@@ -533,7 +538,7 @@ void CFakeFortuneDlg::OnTimer(UINT_PTR nIDEvent)
 			m_Picture.Draw();
 			m_ForeText.SetWindowText(gShareData.NextShowValue);
 			m_ForeText2.SetWindowText(gShareData.NextShowName);
-			PlaySound(TEXT(TYPE1_DRAW_SOUND), 0, SND_FILENAME | SND_ASYNC);
+			PlaySound(TEXT(TYPE1_DRAW_SOUND), 0, SND_FILENAME | SND_ASYNC | SND_NODEFAULT);
 			KillTimer(nIDEvent);
 			EnableDrawButton(1);
 			RedrawButtons();
@@ -545,7 +550,7 @@ void CFakeFortuneDlg::OnTimer(UINT_PTR nIDEvent)
 
 			if (gShareData.ShowCount > len) {
 				m_ForeText2.SetWindowText(gShareData.NextShowName);
-				PlaySound(TEXT(TYPE1_DRAW_SOUND), 0, SND_FILENAME | SND_ASYNC);
+				PlaySound(TEXT(TYPE1_DRAW_SOUND), 0, SND_FILENAME | SND_ASYNC | SND_NODEFAULT);
 				KillTimer(nIDEvent);
 				EnableDrawButton(1);
 				EnablePauseButton(0);
@@ -564,7 +569,7 @@ void CFakeFortuneDlg::OnTimer(UINT_PTR nIDEvent)
 			}
 
 			m_ForeText.SetWindowText(gShareData.NextShowValue.Mid(0, gShareData.ShowCount));
-			PlaySound(TEXT(TYPE2_DRAW_SOUND), 0, SND_FILENAME | SND_ASYNC);
+			PlaySound(TEXT(TYPE2_DRAW_SOUND), 0, SND_FILENAME | SND_ASYNC | SND_NODEFAULT);
 		}
 	}
 }
@@ -585,11 +590,14 @@ void CFakeFortuneDlg::RemoveNthFromPool(int idx)
 	char name[96] = { 0 };
 	Unicode2Utf8(log, name, 96);
 	CFile RawLogFile;
-	RawLogFile.Open(LogFileName, CFile::modeReadWrite);
-	RawLogFile.SeekToEnd();
-	RawLogFile.Write(name, strlen(name));
-	//RawLogFile.Write("\r\n", 2);
-	RawLogFile.Close();
+	try {
+		RawLogFile.Open(LogFileName, CFile::modeReadWrite);
+		RawLogFile.SeekToEnd();
+		RawLogFile.Write(name, strlen(name));
+		RawLogFile.Close();
+	} catch (...) {
+		//
+	}
 
 	HistoryRecord record;
 	record.time = time;
