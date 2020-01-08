@@ -418,6 +418,7 @@ void CFakeFortuneDlg::OnBnClickedButtonShowPool()
 	// TODO: 在此加入控制項告知處理常式程式碼
 	poolDlg.ShowWindow(SW_SHOW);
 	poolDlg.UpdateWindow();
+	this->SetFocus();
 }
 
 
@@ -426,6 +427,7 @@ void CFakeFortuneDlg::OnBnClickedButtonShowHistory()
 	// TODO: 在此加入控制項告知處理常式程式碼
 	historyDlg.ShowWindow(SW_SHOW);
 	historyDlg.UpdateWindow();
+	this->SetFocus();
 }
 
 LRESULT CFakeFortuneDlg::OnMyMSG(WPARAM wPararm, LPARAM lParam)
@@ -672,6 +674,7 @@ void CFakeFortuneDlg::OnBnClickedButtonType1Draw()
 		///
 		EnableDrawButton(0);
 	}
+	this->SetFocus();
 }
 
 void CFakeFortuneDlg::OnBnClickedButtonType2Draw()
@@ -691,6 +694,7 @@ void CFakeFortuneDlg::OnBnClickedButtonType2Draw()
 	EnableDrawButton(0);
 
 	///
+	this->SetFocus();
 }
 
 void CFakeFortuneDlg::EnableDrawButton(int en)
@@ -822,10 +826,12 @@ void CFakeFortuneDlg::OnBnClickedButtonPause()
 	if (gShareData.Paused) {
 		gShareData.Paused = 0;
 		SetTimer(DRAW_ANIMATION_TIMER_ID, TYPE2_SHOW_INTERVAL_MS, NULL);
+		this->SetFocus();
 	}
 	else {
 		gShareData.Paused = 1;
 		KillTimer(DRAW_ANIMATION_TIMER_ID);
+		this->SetFocus();
 	}
 }
 
